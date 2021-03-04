@@ -1,0 +1,11 @@
+{
+  "require": {
+    "aura/sqlquery": "2.7.1",
+    "league/plates": "^3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}
