@@ -50,6 +50,9 @@
 
 <div class="container">
     <div class="col-md-8"><?=$this->section('content')?></div>
+    <div class="col-md-4">
+        <?php echo flash()?>
+    </div>
 </div>
 </body>
 </html>
