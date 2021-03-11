@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Controllers;
+namespace App\controllers;
 
 use App\Models\QueryBuilder;
 use League\Plates\Engine;
@@ -10,11 +10,11 @@ class Controller
 {
     protected $query, $templates;
 
-    public function __construct()
+    public function __construct(QueryBuilder $queryBuilder, Engine $engine)
     {
-        $this->query = new QueryBuilder();
+        $this->query = $queryBuilder;
         // Create new Plates instance
-        $this->templates = new Engine('../app/views');
+        $this->templates = $engine;
     }
 
 }

@@ -1,15 +1,39 @@
 <?php
 
+namespace App\controllers;
+
 use App\Models\QueryBuilder;
+use Delight\Auth\Auth;
 use League\Plates\Engine;
 
-$query = new QueryBuilder();
 
-$user = ['name'=>'John Dou'];
+class UserController
+{
+    protected $auth, $query, $templates;
 
-// Create new Plates instance
-$templates = new Engine('../app/views');
+    public function __construct(QueryBuilder $queryBuilder, Engine $engine, Auth $auth)
+    {
+        $this->query = $queryBuilder;
+        // Create new Plates instance
+        $this->templates = $engine;
+        $this->auth = $auth;
+    }
 
-// Render a template
-echo $templates->render('user', ['user' => $user]);
+    public function index()
+    {
+        $users = $this->query->getAll('users');
+        echo $this->templates->render('users', ['users' => $users]);
+
+    }
+
+    public function show($vars=null)
+    {
+        $user = $this->query->find($vars['id'], 'users');
+        echo $this->templates->render('user', ['user' => $user]);
+    }
+
+
+
+
+}
 
