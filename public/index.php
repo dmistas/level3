@@ -39,6 +39,11 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->post('/register', ['App\controllers\auth\RegisterController', 'register']);
     $r->get('/verification', ['App\controllers\auth\RegisterController', 'emailVerification']);
 
+    $r->get('/login', ['App\controllers\auth\LoginController', 'show']);
+    $r->post('/login', ['App\controllers\auth\LoginController', 'login']);
+
+    $r->get('/logout', ['App\controllers\auth\LoginController', 'logout']);
+
     $r->addRoute('GET', '/posts', ['App\controllers\PostController', 'index']);
     $r->addRoute('GET', '/mail', ['App\controllers\MailController', 'index']);
     // {id} must be a number (\d+)

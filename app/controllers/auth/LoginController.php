@@ -4,33 +4,54 @@
 namespace App\controllers\auth;
 
 
+use App\controllers\Redirect;
 use Delight\Auth\Auth;
+use League\Plates\Engine;
+use Tamtamchik\SimpleFlash\Flash;
 
 class LoginController
 {
-    public function __construct()
+    private $templates, $auth, $flash;
+
+    public function __construct(Engine $templates, Auth $auth, Flash $flash)
     {
+        $this->auth = $auth;
+        $this->templates = $templates;
+        $this->flash = $flash;
 
     }
 
-    public function login(Auth $auth)
+    public function show()
     {
-        try {
-            $auth->login($_POST['email'], $_POST['password']);
+        echo $this->templates->render('login');
+    }
 
-            echo 'User is logged in';
-        }
-        catch (\Delight\Auth\InvalidEmailException $e) {
+    public function login()
+    {
+        $remember = isset($_POST['remember']);
+        $rememberDuration = $remember ? (int)(60 * 60 * 24 * 30) : null;
+
+        try {
+            $this->auth->login($_POST['email'], $_POST['password'], $rememberDuration);
+            $this->flash->message("I've been successfully login!", "success");
+            Redirect::to('/');
+
+        } catch (\Delight\Auth\InvalidEmailException $e) {
             die('Wrong email address');
-        }
-        catch (\Delight\Auth\InvalidPasswordException $e) {
+        } catch (\Delight\Auth\InvalidPasswordException $e) {
             die('Wrong password');
-        }
-        catch (\Delight\Auth\EmailNotVerifiedException $e) {
+        } catch (\Delight\Auth\EmailNotVerifiedException $e) {
             die('Email not verified');
-        }
-        catch (\Delight\Auth\TooManyRequestsException $e) {
+        } catch (\Delight\Auth\TooManyRequestsException $e) {
             die('Too many requests');
         }
     }
+
+    public function logout()
+    {
+        $this->auth->logOut();
+        Redirect::to('/login');
+    }
+
+
 }

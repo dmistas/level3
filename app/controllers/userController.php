@@ -28,6 +28,7 @@ class UserController
 
     public function show($vars=null)
     {
+
         $user = $this->query->find($vars['id'], 'users');
         echo $this->templates->render('user', ['user' => $user]);
     }

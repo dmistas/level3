@@ -31,8 +31,8 @@ class RegisterController
                 $sendEmail = $this->mail->sendVerificationEmail($_POST['email'], $_POST['username'], $selector, $token);
                 echo $sendEmail;
             });
-
-            echo 'We have signed up a new user with the ID ' . $userId;die();
+            $this->flash->message('Мы отправили Вам письмо для верификации email', 'success');
+            Redirect::to('/login');
         }
         catch (\Delight\Auth\InvalidEmailException $e) {
             $this->flash->message('Invalid email address', 'error');

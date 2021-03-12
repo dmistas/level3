@@ -4,8 +4,19 @@
 namespace App\controllers;
 
 
-class PostController extends Controller
+use App\Models\QueryBuilder;
+use League\Plates\Engine;
+
+class PostController
 {
+    protected $query, $templates;
+
+    public function __construct(QueryBuilder $queryBuilder, Engine $engine)
+    {
+        $this->query = $queryBuilder;
+        // Create new Plates instance
+        $this->templates = $engine;
+    }
     public function index()
     {
         $posts = $this->query->getAll('posts');
