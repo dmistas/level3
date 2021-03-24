@@ -35,11 +35,11 @@
         <form action="/login" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="form-label" for="username">Email</label>
-                <input type="email" id="username" name="email" class="form-control" placeholder="Эл. адрес" value="">
+                <input type="text" id="username" name="email" class="form-control" placeholder="Эл. адрес" value="">
             </div>
             <div class="form-group">
                 <label class="form-label" for="password">Пароль</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="">
+                <input type="text" id="password" name="password" class="form-control" placeholder="">
             </div>
             <div class="form-group text-left">
                 <div class="custom-control custom-checkbox">

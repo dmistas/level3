@@ -26,27 +26,27 @@ class RegisterController
     {
         try {
             $userId = $this->auth->register($_POST['email'], $_POST['password'], $_POST['username'], function ($selector, $token) {
-                echo 'Send ' . $selector . ' and ' . $token . ' to the user (e.g. via email)';
-
                 $sendEmail = $this->mail->sendVerificationEmail($_POST['email'], $_POST['username'], $selector, $token);
-                echo $sendEmail;
+//                echo $sendEmail;
             });
             $this->flash->message('Мы отправили Вам письмо для верификации email', 'success');
             Redirect::to('/login');
+            exit();
         }
         catch (\Delight\Auth\InvalidEmailException $e) {
-            $this->flash->message('Invalid email address', 'error');
+            $this->flash->message('Некорректный email адрес', 'error');
         }
         catch (\Delight\Auth\InvalidPasswordException $e) {
-            $this->flash->message('Invalid password');
+            $this->flash->message('Invalid password', 'error');
         }
         catch (\Delight\Auth\UserAlreadyExistsException $e) {
-            $this->flash->message('User already exists');
+            $this->flash->message('Пользователь с таким email уже существует', 'error');
         }
         catch (\Delight\Auth\TooManyRequestsException $e) {
             $this->flash->message('Too many requests');
         }
         Redirect::to('/register');
+        exit();
     }
 
     public function show()
@@ -61,7 +61,7 @@ class RegisterController
         try {
             $this->auth->confirmEmail($_GET['selector'], $_GET['token']);
             $this->flash->message('Email address has been verified', 'success');
-            Redirect::to('/users');
+            Redirect::to('/login');
         }
         catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
             die('Invalid token');

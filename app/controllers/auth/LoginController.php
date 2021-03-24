@@ -33,18 +33,21 @@ class LoginController
 
         try {
             $this->auth->login($_POST['email'], $_POST['password'], $rememberDuration);
-            $this->flash->message("I've been successfully login!", "success");
+            $this->flash->message("Вы были успешно авторизованы!", "success");
             Redirect::to('/');
+            exit();
 
         } catch (\Delight\Auth\InvalidEmailException $e) {
-            die('Wrong email address');
+            $this->flash->message('Wrong email address', 'error');
         } catch (\Delight\Auth\InvalidPasswordException $e) {
-            die('Wrong password');
+            $this->flash->message('Wrong password', 'error');
         } catch (\Delight\Auth\EmailNotVerifiedException $e) {
-            die('Email not verified');
+            $this->flash->message('Email not verified', 'error');
         } catch (\Delight\Auth\TooManyRequestsException $e) {
-            die('Too many requests');
+            $this->flash->message('Too many requests', 'error');
         }
+        Redirect::to('/login');
+        exit();
     }
 
     public function logout()

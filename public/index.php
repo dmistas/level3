@@ -4,7 +4,6 @@ if (!session_id()) @session_start();
 require_once "../vendor/autoload.php";
 
 
-
 $builder = new DI\ContainerBuilder();
 $builder->addDefinitions([
     PDO::class => function () {
@@ -22,9 +21,9 @@ $builder->addDefinitions([
     League\Plates\Engine::class => function () {
         return new League\Plates\Engine('../app/views');
     },
-    Delight\Auth\Auth::class => function($container){
-        return new Delight\Auth\Auth($container->get('PDO'));
-    }
+    Delight\Auth\Auth::class => function ($container) {
+        return new Delight\Auth\Auth($container->get('PDO'),null,null,false);
+    },
 
 ]);
 
@@ -32,9 +31,21 @@ $container = $builder->build();
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
 
-    $r->addRoute('GET', '/user/{id:\d+}', ['App\controllers\UserController', 'show']);
+    $r->addRoute('GET', '/users/{id:\d+}', ['App\controllers\UserController', 'userProfileShow']);
     $r->addRoute('GET', '/', ['App\controllers\UserController', 'index']);
-    
+
+    $r->addGroup('/edit', function (FastRoute\RouteCollector $r) {
+        $r->get( '/profile/{id:\d+}', ['App\controllers\UserController', 'editProfileShow']);
+        $r->post('/profile/{id:\d+}', ['App\controllers\UserController', 'editProfile']);
+        $r->get('/security/{id:\d+}', ['App\controllers\UserController', 'editSecurityShow']);
+        $r->post('/security', ['App\controllers\UserController', 'editSecurity']);
+
+        $r->addRoute('GET', '/status/{id:\d+}', ['App\controllers\UserController', 'editStatusPage']);
+        $r->addRoute('GET', '/avatar/{id:\d+}', ['App\controllers\UserController', 'editAvatarPage']);
+
+    });
+
+
     $r->get('/register', ['App\controllers\auth\RegisterController', 'show']);
     $r->post('/register', ['App\controllers\auth\RegisterController', 'register']);
     $r->get('/verification', ['App\controllers\auth\RegisterController', 'emailVerification']);
@@ -43,6 +54,19 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->post('/login', ['App\controllers\auth\LoginController', 'login']);
 
     $r->get('/logout', ['App\controllers\auth\LoginController', 'logout']);
+
+    // Admin
+    $r->addGroup('/admin', function (FastRoute\RouteCollector $r){
+        $r->get('/add-user', ['App\controllers\AdminController', 'addUserShow']);
+        $r->post('/add-user', ['App\controllers\AdminController', 'addUser']);
+        $r->post('/edit/security/{id:\d+}', ['App\controllers\AdminController', 'editUserSecurity']);
+
+    });
+
+
+    $r->get('/seed', ['App\controllers\AdminController', 'seed']);
+    $r->get('/test', ['App\controllers\AdminController', 'test']);
+
 
     $r->addRoute('GET', '/posts', ['App\controllers\PostController', 'index']);
     $r->addRoute('GET', '/mail', ['App\controllers\MailController', 'index']);

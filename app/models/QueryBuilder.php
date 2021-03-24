@@ -51,6 +51,76 @@ class QueryBuilder
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getAllUsers()
+    {
+        $select = $this->queryFactory->newSelect();
+        $select->cols([
+            'users.id as id',
+            'users.email',
+            'users.username',
+            'users.status',
+            'users_info.job_title',
+            'users_info.avatar',
+            'users_info.vk',
+            'users_info.telegram',
+            'users_info.instagram',
+            'users_info.phone',
+            'users_info.address',
+            'status.status',
+        ]);
+        $select->from('users');
+        $select->join(
+            'LEFT',
+            'users_info',
+            'users_info.user_id = users.id'
+        );
+        $select->join(
+            'LEFT',
+            'status',
+            'users_info.status_id = status.id'
+        );
+        $sth = $this->pdo->prepare($select->getStatement());
+        $sth->execute($select->getBindValues());
+        return $sth->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getUser($id)
+    {
+        $id = intval($id);
+        $select = $this->queryFactory->newSelect();
+        $select->cols([
+            'users.id as id',
+            'users.email',
+            'users.username',
+            'users.status',
+            'users_info.job_title',
+            'users_info.avatar',
+            'users_info.vk',
+            'users_info.telegram',
+            'users_info.instagram',
+            'users_info.phone',
+            'users_info.address',
+            'status.status',
+            'users_info.id as user_info_id',
+        ]);
+        $select->from('users');
+        $select->join(
+            'LEFT',
+            'users_info',
+            'users_info.user_id = users.id'
+        );
+        $select->join(
+            'LEFT',
+            'status',
+            'users_info.status_id = status.id'
+        );
+        $select->where('users.id = :id')
+        ->bindValue('id', $id);
+        $sth = $this->pdo->prepare($select->getStatement());
+        $sth->execute($select->getBindValues());
+        return $sth->fetch(PDO::FETCH_ASSOC);
+    }
+
     /**
      * @param array $data ассоциативный массив записей [поле => значение]
      * @param string $table название таблицы для записи данных
@@ -74,12 +144,12 @@ class QueryBuilder
 
     /**
      * @param array $data
-     * @param int $id
+     * @param int|string $id
      * @param string $table
      *
      * @return boolean
      */
-    public function update(array $data, int $id, string $table)
+    public function update(array $data, $id, string $table)
     {
         $update = $this->queryFactory->newUpdate();
 
