@@ -175,34 +175,15 @@ class AdminController extends UserController
             $this->flash->message('Пользователь с таким email уже существует', 'error');
         }
 
-
         if (!$newUserId) {
             $this->flash->error('Ошибка при создании пользователя');
             Redirect::to('/add-user');
         }
 
-        $imgUrl = '/img/avatars/avatar.png'; // аватар по умолчанию
-        if (isset($_FILES['avatar']['name']) && !empty($_FILES['avatar']['name'])) {
-            $this->upload->withTargetDirectory($_SERVER['DOCUMENT_ROOT'] . '/img/avatars');
-            $this->upload->from('avatar');
+        // загружаем аватар или путь по умолчанию
+        $imgUrl = $this->uploadImage();
+        if (!$imgUrl) {$imgUrl = '/img/avatars/avatar.png';}
 
-            try {
-                $uploadedFile = $this->upload->save();
-                // если файл загружен меняем дефолтный путь
-                $imgUrl = '/img/avatars/' . $uploadedFile->getFilenameWithExtension();
-
-            } catch (\Delight\FileUpload\Throwable\InputNotFoundException $e) {
-                echo 'input not found';
-            } catch (\Delight\FileUpload\Throwable\InvalidFilenameException $e) {
-                echo 'invalid filename';
-            } catch (\Delight\FileUpload\Throwable\InvalidExtensionException $e) {
-                echo 'invalid extension';
-            } catch (\Delight\FileUpload\Throwable\FileTooLargeException $e) {
-                echo 'file too large';
-            } catch (\Delight\FileUpload\Throwable\UploadCancelledException $e) {
-                echo 'upload cancelled';
-            }
-        }
         $id_user_info = $this->query->insert([
             'user_id' => $newUserId,
             'job_title' => $_POST['job_title'],
@@ -214,6 +195,7 @@ class AdminController extends UserController
             'phone' => $_POST['phone'],
             'address' => $_POST['address']
         ], 'users_info');
+
         $this->flash->success('Пользователь добавлен');
         Redirect::to('/');
         exit();

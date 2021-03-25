@@ -31,19 +31,21 @@ $container = $builder->build();
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
 
-    $r->addRoute('GET', '/users/{id:\d+}', ['App\controllers\UserController', 'userProfileShow']);
+    $r->addRoute('GET', '/users/{id:\d+}', ['App\controllers\UserController', 'showUserProfile']);
     $r->addRoute('GET', '/', ['App\controllers\UserController', 'index']);
 
     $r->addGroup('/edit', function (FastRoute\RouteCollector $r) {
         $r->get( '/profile/{id:\d+}', ['App\controllers\UserController', 'showEditProfile']);
         $r->post('/profile/{id:\d+}', ['App\controllers\UserController', 'editProfile']);
 
-        $r->get('/security/{id:\d+}', ['App\controllers\UserController', 'editSecurityShow']);
+        $r->get('/security/{id:\d+}', ['App\controllers\UserController', 'showEditSecurity']);
         $r->post('/security', ['App\controllers\UserController', 'editSecurity']);
 
         $r->get( '/status/{id:\d+}', ['App\controllers\UserController', 'showEditStatus']);
         $r->post( '/status/{id:\d+}', ['App\controllers\UserController', 'EditStatus']);
-        $r->addRoute('GET', '/avatar/{id:\d+}', ['App\controllers\UserController', 'editAvatarPage']);
+
+        $r->get( '/media/{id:\d+}', ['App\controllers\UserController', 'showUploadAvatar']);
+        $r->post( '/media/{id:\d+}', ['App\controllers\UserController', 'uploadAvatar']);
 
     });
 

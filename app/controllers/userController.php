@@ -8,6 +8,7 @@ use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Delight\FileUpload\FileUpload;
 use League\Plates\Engine;
+use mysql_xdevapi\Exception;
 use Tamtamchik\SimpleFlash\Flash;
 
 
@@ -48,13 +49,13 @@ class UserController
         }
     }
 
-    public function userProfileShow($vars = null)
+    public function showUserProfile($vars = null)
     {
         $user = $this->query->getUser($vars['id']);
         echo $this->templates->render('user_profile', ['user' => $user]);
     }
 
-    public function editSecurityShow($vars)
+    public function showEditSecurity($vars)
     {
         $user = $this->query->getUser($vars['id']);
         echo $this->templates->render('edit_user_security', ['user' => $user, 'auth' => $this->auth]);
@@ -94,14 +95,11 @@ class UserController
             $this->auth->changePassword($_POST['password'], $_POST['password_new']);
             $isPasswordChanged = true;
             $this->flash->success('Пароль успешно изменен');
-        }
-        catch (\Delight\Auth\NotLoggedInException $e) {
+        } catch (\Delight\Auth\NotLoggedInException $e) {
             $this->flash->error('Not logged in');
-        }
-        catch (\Delight\Auth\InvalidPasswordException $e) {
+        } catch (\Delight\Auth\InvalidPasswordException $e) {
             $this->flash->error('Invalid password(s)');
-        }
-        catch (\Delight\Auth\TooManyRequestsException $e) {
+        } catch (\Delight\Auth\TooManyRequestsException $e) {
             $this->flash->error('Too many requests');
         }
         return $isPasswordChanged;
@@ -158,15 +156,66 @@ class UserController
 
     public function editStatus($vars)
     {
-        if (isset($_POST['status'])){
-        $statusId = $this->query->getStatusId($_POST['status']);
-        $isUpdateStatus = $this->query->update(['status_id'=>$statusId], $vars['id'], 'users_info');
-        if ($isUpdateStatus){$this->flash->success('Статус изменен');}
-        } else{
+        if (isset($_POST['status'])) {
+            $statusId = $this->query->getStatusId($_POST['status']);
+            $isUpdateStatus = $this->query->update(['status_id' => $statusId], $vars['id'], 'users_info');
+            if ($isUpdateStatus) {
+                $this->flash->success('Статус изменен');
+            }
+        } else {
             $this->flash->info('Статус не изменен');
         }
         Redirect::to('/');
     }
 
+    public function showUploadAvatar($vars)
+    {
+        $this->hasAccessRights($vars['id']);
+        $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('edit_user_avatar', ['user' => $user]);
+    }
+
+    public function uploadAvatar($vars)
+    {
+        $currentImageUrl = $this->query->getUser($vars['id'])['avatar'];
+        $imgUrl = $this->uploadImage();
+        if ($imgUrl){
+            $this->query->update(['avatar'=>$imgUrl], $vars['id'], 'users_info');
+            if(file_exists($_SERVER['DOCUMENT_ROOT'].$currentImageUrl)){
+                unlink($_SERVER['DOCUMENT_ROOT'].$currentImageUrl);
+            }else{
+                $this->flash->warning('file not found');
+            }
+            $this->flash->success('Аватар обновлен');
+        }
+        Redirect::to('/');
+    }
+
+    protected function uploadImage()
+    {
+        $this->upload->withTargetDirectory($_SERVER['DOCUMENT_ROOT'] . '/img/avatars');
+        $this->upload->from('avatar');
+
+        try {
+            $uploadedFile = $this->upload->save();
+            // если файл загружен меняем дефолтный путь
+            $imgUrl = '/img/avatars/' . $uploadedFile->getFilenameWithExtension();
+            $this->flash->success('Файл загружен');
+            return $imgUrl;
+
+        } catch (\Delight\FileUpload\Throwable\InputNotFoundException $e) {
+            $this->flash->error('input not found');
+        } catch (\Delight\FileUpload\Throwable\InvalidFilenameException $e) {
+            $this->flash->error('invalid filename');
+        } catch (\Delight\FileUpload\Throwable\InvalidExtensionException $e) {
+            $this->flash->error('invalid extension');
+        } catch (\Delight\FileUpload\Throwable\FileTooLargeException $e) {
+            $this->flash->error('file too large');
+        } catch (\Delight\FileUpload\Throwable\UploadCancelledException $e) {
+            $this->flash->error('upload cancelled');
+        }
+        return false;
+
+    }
 }
 

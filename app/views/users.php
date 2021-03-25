@@ -13,7 +13,7 @@ $this->layout('layout', ['title' => 'Users'])
 <div class="row">
     <div class="col-xl-12">
         <?php if ($auth->hasRole(Role::ADMIN)): ?>
-            <a class="btn btn-success" href="create_user.html">Добавить</a>
+            <a class="btn btn-success" href="/admin/add-user">Добавить</a>
         <?php endif; ?>
         <div class="border-faded bg-faded p-3 mb-g d-flex mt-3">
             <input type="text" id="js-filter-contacts" name="filter-contacts"

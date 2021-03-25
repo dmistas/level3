@@ -17,7 +17,7 @@ $this->layout('layout', ['title' => 'Add user']) ?>
         </div>
     </div>
 <?php endif; ?>
-<form action="/add-user" method="post" enctype="multipart/form-data">
+<form action="/admin/add-user" method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-xl-6">
             <div id="panel-1" class="panel">
