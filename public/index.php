@@ -35,12 +35,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/', ['App\controllers\UserController', 'index']);
 
     $r->addGroup('/edit', function (FastRoute\RouteCollector $r) {
-        $r->get( '/profile/{id:\d+}', ['App\controllers\UserController', 'editProfileShow']);
+        $r->get( '/profile/{id:\d+}', ['App\controllers\UserController', 'showEditProfile']);
         $r->post('/profile/{id:\d+}', ['App\controllers\UserController', 'editProfile']);
+
         $r->get('/security/{id:\d+}', ['App\controllers\UserController', 'editSecurityShow']);
         $r->post('/security', ['App\controllers\UserController', 'editSecurity']);
 
-        $r->addRoute('GET', '/status/{id:\d+}', ['App\controllers\UserController', 'editStatusPage']);
+        $r->get( '/status/{id:\d+}', ['App\controllers\UserController', 'showEditStatus']);
+        $r->post( '/status/{id:\d+}', ['App\controllers\UserController', 'EditStatus']);
         $r->addRoute('GET', '/avatar/{id:\d+}', ['App\controllers\UserController', 'editAvatarPage']);
 
     });
@@ -57,7 +59,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     // Admin
     $r->addGroup('/admin', function (FastRoute\RouteCollector $r){
-        $r->get('/add-user', ['App\controllers\AdminController', 'addUserShow']);
+        $r->get('/add-user', ['App\controllers\AdminController', 'showAddUser']);
         $r->post('/add-user', ['App\controllers\AdminController', 'addUser']);
         $r->post('/edit/security/{id:\d+}', ['App\controllers\AdminController', 'editUserSecurity']);
 

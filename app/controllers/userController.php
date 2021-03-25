@@ -121,7 +121,7 @@ class UserController
         exit();
     }
 
-    public function editProfileShow($vars)
+    public function showEditProfile($vars)
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
@@ -149,6 +149,24 @@ class UserController
         exit();
     }
 
+    public function showEditStatus($vars)
+    {
+        $this->hasAccessRights($vars['id']);
+        $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('edit_user_status', ['user' => $user]);
+    }
+
+    public function editStatus($vars)
+    {
+        if (isset($_POST['status'])){
+        $statusId = $this->query->getStatusId($_POST['status']);
+        $isUpdateStatus = $this->query->update(['status_id'=>$statusId], $vars['id'], 'users_info');
+        if ($isUpdateStatus){$this->flash->success('Статус изменен');}
+        } else{
+            $this->flash->info('Статус не изменен');
+        }
+        Redirect::to('/');
+    }
 
 }
 

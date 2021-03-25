@@ -184,4 +184,18 @@ class QueryBuilder
 
         return boolval($sth->rowCount());
     }
+
+    public function getStatusId($status)
+    {
+        $select = $this->queryFactory->newSelect();
+
+        $select->cols(['*']);
+        $select->from('status')
+            ->where('status = :status')
+            ->bindValue('status', $status);
+
+        $sth = $this->pdo->prepare($select->getStatement());
+        $sth->execute($select->getBindValues());
+        return intval($sth->fetch(PDO::FETCH_ASSOC)['id']);
+    }
 }

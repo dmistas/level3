@@ -147,7 +147,7 @@ class AdminController extends UserController
         }
     }
 
-    public function addUserShow()
+    public function showAddUser()
     {
         $this->redirectIfNotAdmin();
         echo $this->templates->render('add_user');

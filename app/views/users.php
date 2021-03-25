@@ -38,7 +38,12 @@ $this->layout('layout', ['title' => 'Users'])
                  data-filter-tags="<?= strtolower($user['username']) ?>">
                 <div class="card-body border-faded border-top-0 border-left-0 border-right-0 rounded-top">
                     <div class="d-flex flex-row align-items-center">
-                                <span class="status status-success mr-3">
+                                <span class="status
+                                <?php
+                                if ($user['status']=='online') echo 'status-success';
+                                if ($user['status']=='offline') echo 'status-danger';
+                                if ($user['status']=='dnd') echo 'status-warning';
+                                ?> mr-3">
                                     <span class="rounded-circle profile-image d-block "
                                           style="background-image:url(<?= $user['avatar'] ?>); background-size: cover;"></span>
                                 </span>
@@ -58,10 +63,10 @@ $this->layout('layout', ['title' => 'Users'])
                                     <a class="dropdown-item" href="/edit/security/<?= $user['id'] ?>">
                                         <i class="fa fa-lock"></i>
                                         Безопасность</a>
-                                    <a class="dropdown-item" href="/status/<?= $user['id'] ?>">
+                                    <a class="dropdown-item" href="/edit/status/<?= $user['id'] ?>">
                                         <i class="fa fa-sun"></i>
                                         Установить статус</a>
-                                    <a class="dropdown-item" href="media/<?= $user['id'] ?>">
+                                    <a class="dropdown-item" href="/edit/media/<?= $user['id'] ?>">
                                         <i class="fa fa-camera"></i>
                                         Загрузить аватар
                                     </a>
