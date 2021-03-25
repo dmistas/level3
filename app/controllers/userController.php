@@ -2,13 +2,12 @@
 
 namespace App\controllers;
 
-use App\models\Mail;
+use App\Models\Mail;
 use App\Models\QueryBuilder;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Delight\FileUpload\FileUpload;
 use League\Plates\Engine;
-use mysql_xdevapi\Exception;
 use Tamtamchik\SimpleFlash\Flash;
 
 
@@ -36,6 +35,7 @@ class UserController
     public function index()
     {
         $users = $this->query->getAllUsers();
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('users', ['users' => $users, 'auth' => $this->auth]);
 
     }
@@ -52,12 +52,14 @@ class UserController
     public function showUserProfile($vars = null)
     {
         $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('user_profile', ['user' => $user]);
     }
 
     public function showEditSecurity($vars)
     {
         $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('edit_user_security', ['user' => $user, 'auth' => $this->auth]);
     }
 
@@ -107,7 +109,6 @@ class UserController
 
     public function editSecurity()
     {
-        echo "edit security user";
         if (isset($_POST['email']) && !empty($_POST['email'])) {
             $this->changeEmail();
         }
@@ -123,6 +124,7 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('edit_user_profile', ['user' => $user]);
     }
 
@@ -151,14 +153,16 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('edit_user_status', ['user' => $user]);
     }
 
     public function editStatus($vars)
     {
         if (isset($_POST['status'])) {
+            $user = $this->query->getUser($vars['id']);
             $statusId = $this->query->getStatusId($_POST['status']);
-            $isUpdateStatus = $this->query->update(['status_id' => $statusId], $vars['id'], 'users_info');
+            $isUpdateStatus = $this->query->update(['status_id' => $statusId], $user['user_info_id'], 'users_info');
             if ($isUpdateStatus) {
                 $this->flash->success('Статус изменен');
             }
@@ -172,6 +176,7 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('edit_user_avatar', ['user' => $user]);
     }
 
@@ -179,16 +184,26 @@ class UserController
     {
         $currentImageUrl = $this->query->getUser($vars['id'])['avatar'];
         $imgUrl = $this->uploadImage();
-        if ($imgUrl){
-            $this->query->update(['avatar'=>$imgUrl], $vars['id'], 'users_info');
-            if(file_exists($_SERVER['DOCUMENT_ROOT'].$currentImageUrl)){
-                unlink($_SERVER['DOCUMENT_ROOT'].$currentImageUrl);
-            }else{
-                $this->flash->warning('file not found');
+        if ($imgUrl) {
+            $this->query->update(['avatar' => $imgUrl], $vars['id'], 'users_info');
+
+            $isDeleteOldAvatar = $this->deleteOldAvatar($currentImageUrl);
+
+            if (!$isDeleteOldAvatar) {
+                $this->flash->warning('Файл удаляемого аватара не найден');
             }
             $this->flash->success('Аватар обновлен');
         }
         Redirect::to('/');
+    }
+
+    public function deleteOldAvatar($path)
+    {
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . $path)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . $path);
+            return true;
+        }
+        return false;
     }
 
     protected function uploadImage()
@@ -216,6 +231,22 @@ class UserController
         }
         return false;
 
+    }
+
+    public function deleteUser($vars)
+    {
+        $this->hasAccessRights($vars['id']);
+        $user = $this->query->getUser($vars['id']);
+        $userInfoId = $user['user_info_id'];
+        $oldAvatarPath =  $_SERVER['DOCUMENT_ROOT'] . $user['avatar'];
+        $deleteUser = $this->query->delete($userInfoId, 'users_info');
+
+        if ($deleteUser) {
+            $this->deleteOldAvatar($oldAvatarPath);
+            $this->auth->admin()->deleteUserById($vars['id']);
+            $this->flash->info('Пользователь удален!');
+        }
+        Redirect::to('/');
     }
 }
 

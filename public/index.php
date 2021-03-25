@@ -47,6 +47,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
         $r->get( '/media/{id:\d+}', ['App\controllers\UserController', 'showUploadAvatar']);
         $r->post( '/media/{id:\d+}', ['App\controllers\UserController', 'uploadAvatar']);
 
+        $r->get( '/delete/{id:\d+}', ['App\controllers\UserController', 'deleteUser']);
+
     });
 
 

@@ -70,7 +70,7 @@ $this->layout('layout', ['title' => 'Users'])
                                         <i class="fa fa-camera"></i>
                                         Загрузить аватар
                                     </a>
-                                    <a href="delete/<?= $user['id'] ?>" class="dropdown-item"
+                                    <a href="/edit/delete/<?= $user['id'] ?>" class="dropdown-item"
                                        onclick="return confirm('are you sure?');">
                                         <i class="fa fa-window-close"></i>
                                         Удалить

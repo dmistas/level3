@@ -2,7 +2,7 @@
 
 namespace App\controllers;
 
-use App\models\Mail;
+use App\Models\Mail;
 use App\Models\QueryBuilder;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
@@ -150,6 +150,7 @@ class AdminController extends UserController
     public function showAddUser()
     {
         $this->redirectIfNotAdmin();
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('add_user');
     }
 
