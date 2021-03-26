@@ -26,6 +26,7 @@ $this->layout('layout', ['title' => 'Add user']) ?>
                         <h2>Общая информация</h2>
                     </div>
                     <div class="panel-content">
+                        <input type="hidden" name="token" value="<?php echo $token; ?>">
                         <!-- username -->
                         <div class="form-group">
                             <label class="form-label" for="simpleinput">Имя</label>

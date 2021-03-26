@@ -24,6 +24,7 @@ $this->layout('layout', ['title' => 'Редактирование']) ?>
                         <h2>Обновление эл. адреса и пароля</h2>
                     </div>
                     <div class="panel-content">
+                        <input type="hidden" name="token" value="<?php echo $token; ?>">
                         <!-- email -->
                         <div class="form-group">
                             <label class="form-label" for="simpleinput">Email</label>

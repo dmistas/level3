@@ -24,6 +24,10 @@ $builder->addDefinitions([
     Delight\Auth\Auth::class => function ($container) {
         return new Delight\Auth\Auth($container->get('PDO'),null,null,false);
     },
+    \EasyCSRF\EasyCSRF::class => function(){
+        $sessionProvider = new EasyCSRF\NativeSessionProvider();
+        return new EasyCSRF\EasyCSRF($sessionProvider);
+    }
 
 ]);
 

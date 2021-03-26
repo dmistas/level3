@@ -7,6 +7,7 @@ use App\Models\QueryBuilder;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Delight\FileUpload\FileUpload;
+use EasyCSRF\EasyCSRF;
 use League\Plates\Engine;
 use Tamtamchik\SimpleFlash\Flash;
 use Faker\Factory;
@@ -22,10 +23,11 @@ class AdminController extends UserController
         Auth $auth,
         FileUpload $upload,
         Flash $flash,
-        Mail $mail
+        Mail $mail,
+        EasyCSRF $easyCSRF
     )
     {
-        parent::__construct($query, $templates, $auth, $upload, $flash, $mail);
+        parent::__construct($query, $templates, $auth, $upload, $flash, $mail, $easyCSRF);
         $this->faker = Factory::create();
     }
 
@@ -36,10 +38,6 @@ class AdminController extends UserController
 
     public function seed()
     {
-        echo $this->faker->name() . "<br>";
-        echo $this->faker->email() . "<br>";
-        echo $this->faker->text() . "<br>";
-        echo $this->faker->imageUrl(360, 360, 'animals', true, 'cats') . "<br>";
         $userCredential = [];
 
         for ($i = 1; $i <= 30; $i++) {
@@ -55,18 +53,15 @@ class AdminController extends UserController
             $user['last_login'] = 0;
             $user['force_logout'] = 0;
             $userCredential[] = $user;
-
         }
-        d($userCredential);
+
         $user_id = [];
-//        for ($i = 1; $i<=30; $i++){
-//            $user_id[]=$i;
-//        }
         foreach ($userCredential as $user) {
             $user_id[] = $this->query->insert($user, 'users');
         }
-        d($user_id);
+
         $user_info = [];
+
         foreach ($user_id as $id) {
             $single_user_info = [];
             $single_user_info['user_id'] = $id;
@@ -80,15 +75,18 @@ class AdminController extends UserController
             $single_user_info['address'] = $this->faker->address();
             $user_info[] = $single_user_info;
         }
-        d($user_info);
+
         foreach ($user_info as $user) {
             $this->query->insert($user, 'users_info');
         }
-
     }
 
     private function changeUserPassword($id, $newPassword)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $isPasswordChanged = false;
         try {
             $this->auth->admin()->changePasswordForUserById($id, $newPassword);
@@ -103,6 +101,10 @@ class AdminController extends UserController
 
     private function changeUserEmail($id)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $currentId = $this->auth->getUserId();
         $this->auth->admin()->logInAsUserById($id); // login as editing user
 
@@ -114,6 +116,10 @@ class AdminController extends UserController
 
     public function editUserSecurity($vars)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $this->redirectIfNotAdmin();
         $emailChanged = false;
         $passwordChanged = false;
@@ -150,12 +156,17 @@ class AdminController extends UserController
     public function showAddUser()
     {
         $this->redirectIfNotAdmin();
+        $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('add_user');
+        echo $this->templates->render('add_user', ['token'=>$token]);
     }
 
     public function addUser()
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $v = new Validator($_POST);
         $v->rules([
             'required' => ['email', 'password', 'username'],
@@ -183,7 +194,9 @@ class AdminController extends UserController
 
         // загружаем аватар или путь по умолчанию
         $imgUrl = $this->uploadImage();
-        if (!$imgUrl) {$imgUrl = '/img/avatars/avatar.png';}
+        if (!$imgUrl) {
+            $imgUrl = '/img/avatars/avatar.png';
+        }
 
         $id_user_info = $this->query->insert([
             'user_id' => $newUserId,

@@ -7,13 +7,15 @@ use App\Models\QueryBuilder;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Delight\FileUpload\FileUpload;
+use EasyCSRF\EasyCSRF;
+use EasyCSRF\Exceptions\InvalidCsrfTokenException;
 use League\Plates\Engine;
 use Tamtamchik\SimpleFlash\Flash;
 
 
 class UserController
 {
-    protected $query, $templates, $auth, $upload, $flash, $mail;
+    protected $query, $templates, $auth, $upload, $flash, $mail, $easyCSRF;
 
     public function __construct(
         QueryBuilder $query,
@@ -21,7 +23,8 @@ class UserController
         Auth $auth,
         FileUpload $upload,
         Flash $flash,
-        Mail $mail
+        Mail $mail,
+        EasyCSRF $easyCSRF
     )
     {
         $this->query = $query;
@@ -30,6 +33,7 @@ class UserController
         $this->upload = $upload;
         $this->flash = $flash;
         $this->mail = $mail;
+        $this->easyCSRF = $easyCSRF;
     }
 
     public function index()
@@ -37,6 +41,7 @@ class UserController
         $users = $this->query->getAllUsers();
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('users', ['users' => $users, 'auth' => $this->auth]);
+
 
     }
 
@@ -59,8 +64,15 @@ class UserController
     public function showEditSecurity($vars)
     {
         $user = $this->query->getUser($vars['id']);
+        $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('edit_user_security', ['user' => $user, 'auth' => $this->auth]);
+        echo $this->templates->render(
+            'edit_user_security',
+            [
+                'user' => $user,
+                'auth' => $this->auth,
+                'token' => $token
+            ]);
     }
 
     protected function changeEmail()
@@ -109,6 +121,10 @@ class UserController
 
     public function editSecurity()
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         if (isset($_POST['email']) && !empty($_POST['email'])) {
             $this->changeEmail();
         }
@@ -124,12 +140,17 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('edit_user_profile', ['user' => $user]);
+        echo $this->templates->render('edit_user_profile', ['user' => $user, 'token' => $token]);
     }
 
     public function editProfile($vars)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $id = $vars['id'];
         $user = $this->query->getUser($id);
         $username = $_POST['username'] ?? $user['username'];
@@ -153,12 +174,17 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('edit_user_status', ['user' => $user]);
+        echo $this->templates->render('edit_user_status', ['user' => $user, 'token' => $token]);
     }
 
     public function editStatus($vars)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         if (isset($_POST['status'])) {
             $user = $this->query->getUser($vars['id']);
             $statusId = $this->query->getStatusId($_POST['status']);
@@ -176,12 +202,17 @@ class UserController
     {
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
+        $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('edit_user_avatar', ['user' => $user]);
+        echo $this->templates->render('edit_user_avatar', ['user' => $user, 'token' => $token]);
     }
 
     public function uploadAvatar($vars)
     {
+        if (!$this->checkToken()){
+            Redirect::to('/');
+            exit();
+        }
         $currentImageUrl = $this->query->getUser($vars['id'])['avatar'];
         $imgUrl = $this->uploadImage();
         if ($imgUrl) {
@@ -197,7 +228,7 @@ class UserController
         Redirect::to('/');
     }
 
-    public function deleteOldAvatar($path)
+    protected function deleteOldAvatar($path)
     {
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . $path)) {
             unlink($_SERVER['DOCUMENT_ROOT'] . $path);
@@ -219,7 +250,7 @@ class UserController
             return $imgUrl;
 
         } catch (\Delight\FileUpload\Throwable\InputNotFoundException $e) {
-            $this->flash->error('input not found');
+            $this->flash->error('Файл изображения не загружен');
         } catch (\Delight\FileUpload\Throwable\InvalidFilenameException $e) {
             $this->flash->error('invalid filename');
         } catch (\Delight\FileUpload\Throwable\InvalidExtensionException $e) {
@@ -238,7 +269,7 @@ class UserController
         $this->hasAccessRights($vars['id']);
         $user = $this->query->getUser($vars['id']);
         $userInfoId = $user['user_info_id'];
-        $oldAvatarPath =  $_SERVER['DOCUMENT_ROOT'] . $user['avatar'];
+        $oldAvatarPath = $_SERVER['DOCUMENT_ROOT'] . $user['avatar'];
         $deleteUser = $this->query->delete($userInfoId, 'users_info');
 
         if ($deleteUser) {
@@ -248,5 +279,17 @@ class UserController
         }
         Redirect::to('/');
     }
+
+    protected function checkToken()
+    {
+        try {
+            $this->easyCSRF->check('csrf', $_POST['token']);
+            return true;
+        } catch(InvalidCsrfTokenException $e) {
+            $this->flash->error($e->getMessage());
+        }
+        return false;
+    }
+
 }
 

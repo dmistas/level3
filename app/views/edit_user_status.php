@@ -20,6 +20,7 @@ $this->layout('layout', ['title' => 'Редактирование']) ?>
                     <div class="panel-content">
                         <div class="row">
                             <div class="col-md-4">
+                                <input type="hidden" name="token" value="<?php echo $token; ?>">
                                 <!-- status -->
                                 <div class="form-group">
                                     <label class="form-label" for="example-select">Выберите статус</label>
