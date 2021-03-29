@@ -122,6 +122,8 @@ $this->layout('layout', ['title' => 'Users'])
     <ul class="pagination">
         <?php if ($paginator->getPrevUrl()): ?>
             <li><a class="page-link" href="<?php echo $paginator->getPrevUrl(); ?>">&laquo; Previous</a></li>
+        <?php else: ?>
+            <li><p class="page-link disabled" href="">&laquo; Previous</p></li>
         <?php endif; ?>
 
         <?php foreach ($paginator->getPages() as $page): ?>
@@ -130,12 +132,14 @@ $this->layout('layout', ['title' => 'Users'])
                     <a class="page-link" href="<?php echo $page['url']; ?>"><?php echo $page['num']; ?></a>
                 </li>
             <?php else: ?>
-                <li class="page-item disabled"><span><?php echo $page['num']; ?></span></li>
+                <li class="disabled"><span><?php echo $page['num']; ?></span></li>
             <?php endif; ?>
         <?php endforeach; ?>
 
         <?php if ($paginator->getNextUrl()): ?>
             <li><a class="page-link" href="<?php echo $paginator->getNextUrl(); ?>">Next &raquo;</a></li>
+        <?php else: ?>
+            <li><p class="page-link disabled" href="">Next &raquo;</p></li>
         <?php endif; ?>
     </ul>
 </nav>
