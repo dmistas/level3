@@ -22,9 +22,9 @@ $builder->addDefinitions([
         return new League\Plates\Engine('../app/views');
     },
     Delight\Auth\Auth::class => function ($container) {
-        return new Delight\Auth\Auth($container->get('PDO'),null,null,false);
+        return new Delight\Auth\Auth($container->get('PDO'), null, null, false);
     },
-    \EasyCSRF\EasyCSRF::class => function(){
+    \EasyCSRF\EasyCSRF::class => function () {
         $sessionProvider = new EasyCSRF\NativeSessionProvider();
         return new EasyCSRF\EasyCSRF($sessionProvider);
     }
@@ -36,25 +36,24 @@ $container = $builder->build();
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
 
     $r->addRoute('GET', '/users/{id:\d+}', ['App\controllers\UserController', 'showUserProfile']);
-    $r->addRoute('GET', '/', ['App\controllers\UserController', 'index']);
+    $r->addRoute('GET', '/[page/{page:\d+}]', ['App\controllers\UserController', 'indexPaginate']);
 
     $r->addGroup('/edit', function (FastRoute\RouteCollector $r) {
-        $r->get( '/profile/{id:\d+}', ['App\controllers\UserController', 'showEditProfile']);
+        $r->get('/profile/{id:\d+}', ['App\controllers\UserController', 'showEditProfile']);
         $r->post('/profile/{id:\d+}', ['App\controllers\UserController', 'editProfile']);
 
         $r->get('/security/{id:\d+}', ['App\controllers\UserController', 'showEditSecurity']);
         $r->post('/security', ['App\controllers\UserController', 'editSecurity']);
 
-        $r->get( '/status/{id:\d+}', ['App\controllers\UserController', 'showEditStatus']);
-        $r->post( '/status/{id:\d+}', ['App\controllers\UserController', 'EditStatus']);
+        $r->get('/status/{id:\d+}', ['App\controllers\UserController', 'showEditStatus']);
+        $r->post('/status/{id:\d+}', ['App\controllers\UserController', 'EditStatus']);
 
-        $r->get( '/media/{id:\d+}', ['App\controllers\UserController', 'showUploadAvatar']);
-        $r->post( '/media/{id:\d+}', ['App\controllers\UserController', 'uploadAvatar']);
+        $r->get('/media/{id:\d+}', ['App\controllers\UserController', 'showUploadAvatar']);
+        $r->post('/media/{id:\d+}', ['App\controllers\UserController', 'uploadAvatar']);
 
-        $r->get( '/delete/{id:\d+}', ['App\controllers\UserController', 'deleteUser']);
+        $r->get('/delete/{id:\d+}', ['App\controllers\UserController', 'deleteUser']);
 
     });
-
 
     $r->get('/register', ['App\controllers\auth\RegisterController', 'show']);
     $r->post('/register', ['App\controllers\auth\RegisterController', 'register']);
@@ -66,17 +65,15 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->get('/logout', ['App\controllers\auth\LoginController', 'logout']);
 
     // Admin
-    $r->addGroup('/admin', function (FastRoute\RouteCollector $r){
+    $r->addGroup('/admin', function (FastRoute\RouteCollector $r) {
         $r->get('/add-user', ['App\controllers\AdminController', 'showAddUser']);
         $r->post('/add-user', ['App\controllers\AdminController', 'addUser']);
         $r->post('/edit/security/{id:\d+}', ['App\controllers\AdminController', 'editUserSecurity']);
 
     });
 
-
     $r->get('/seed', ['App\controllers\AdminController', 'seed']);
     $r->get('/test', ['App\controllers\AdminController', 'test']);
-
 
     $r->addRoute('GET', '/posts', ['App\controllers\PostController', 'index']);
     $r->addRoute('GET', '/mail', ['App\controllers\MailController', 'index']);

@@ -21,6 +21,7 @@ $this->layout('layout', ['title' => 'Загрузить аватар']) ?>
                         </div>
 
                         <div class="form-group">
+                            <input type="hidden" name="token" value="<?php echo $token; ?>">
                             <label class="form-label" for="example-fileinput">Выберите аватар</label>
                             <input type="file" id="example-fileinput" name="avatar" class="form-control-file">
                         </div>

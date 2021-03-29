@@ -40,9 +40,9 @@ $this->layout('layout', ['title' => 'Users'])
                     <div class="d-flex flex-row align-items-center">
                                 <span class="status
                                 <?php
-                                if ($user['status']=='online') echo 'status-success';
-                                if ($user['status']=='offline') echo 'status-danger';
-                                if ($user['status']=='dnd') echo 'status-warning';
+                                if ($user['status'] == 'online') echo 'status-success';
+                                if ($user['status'] == 'offline') echo 'status-danger';
+                                if ($user['status'] == 'dnd') echo 'status-warning';
                                 ?> mr-3">
                                     <span class="rounded-circle profile-image d-block "
                                           style="background-image:url(<?= $user['avatar'] ?>); background-size: cover;"></span>
@@ -77,9 +77,10 @@ $this->layout('layout', ['title' => 'Users'])
                                     </a>
                                 </div>
                             <?php else: ?>
-                            <a href="/users/<?= $user['id'] ?>" class="fs-xl text-truncate text-truncate-lg text-info">
-                                <?= $user['username'] ?>
-                            </a>
+                                <a href="/users/<?= $user['id'] ?>"
+                                   class="fs-xl text-truncate text-truncate-lg text-info">
+                                    <?= $user['username'] ?>
+                                </a>
                             <?php endif; ?>
                             <span class="text-truncate text-truncate-xl"><?= $user['job_title'] ?></span>
                         </div>
@@ -117,3 +118,24 @@ $this->layout('layout', ['title' => 'Users'])
     <?php endforeach; ?>
 
 </div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        <?php if ($paginator->getPrevUrl()): ?>
+            <li><a class="page-link" href="<?php echo $paginator->getPrevUrl(); ?>">&laquo; Previous</a></li>
+        <?php endif; ?>
+
+        <?php foreach ($paginator->getPages() as $page): ?>
+            <?php if ($page['url']): ?>
+                <li <?php echo $page['isCurrent'] ? 'class="page-item active"' : 'class="page-item"'; ?>>
+                    <a class="page-link" href="<?php echo $page['url']; ?>"><?php echo $page['num']; ?></a>
+                </li>
+            <?php else: ?>
+                <li class="page-item disabled"><span><?php echo $page['num']; ?></span></li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <?php if ($paginator->getNextUrl()): ?>
+            <li><a class="page-link" href="<?php echo $paginator->getNextUrl(); ?>">Next &raquo;</a></li>
+        <?php endif; ?>
+    </ul>
+</nav>

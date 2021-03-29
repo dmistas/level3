@@ -9,6 +9,7 @@ use Delight\Auth\Role;
 use Delight\FileUpload\FileUpload;
 use EasyCSRF\EasyCSRF;
 use EasyCSRF\Exceptions\InvalidCsrfTokenException;
+use JasonGrimes\Paginator;
 use League\Plates\Engine;
 use Tamtamchik\SimpleFlash\Flash;
 
@@ -41,7 +42,18 @@ class UserController
         $users = $this->query->getAllUsers();
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
         echo $this->templates->render('users', ['users' => $users, 'auth' => $this->auth]);
+    }
 
+    public function indexPaginate($vars)
+    {
+        $itemsPerPage = 6;
+        $currentPage = intval($vars['page']??1);
+        $totalItems = $this->query->getCountUsers();
+        $paginator = new Paginator($totalItems, $itemsPerPage, $currentPage, '/page/(:num)');
+
+        $users = $this->query->getAllUsers($itemsPerPage,$currentPage);
+        echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
+        echo $this->templates->render('users', ['users' => $users, 'auth' => $this->auth, 'paginator'=>$paginator]);
 
     }
 

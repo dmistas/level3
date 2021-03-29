@@ -27,12 +27,24 @@ class QueryBuilder
 
         $select->cols(['*']);
         $select->from($table)
-        ->where('id = :id')
-        ->bindValue('id', $id);
+            ->where('id = :id')
+            ->bindValue('id', $id);
 
         $sth = $this->pdo->prepare($select->getStatement());
         $sth->execute($select->getBindValues());
         return $sth->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getCountUsers()
+    {
+        $select = $this->queryFactory->newSelect();
+
+        $select->cols(['id']);
+        $select->from('users');
+
+        $sth = $this->pdo->prepare($select->getStatement());
+        $sth->execute($select->getBindValues());
+        return $sth->rowCount();
     }
 
     /**
@@ -51,7 +63,7 @@ class QueryBuilder
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAllUsers()
+    public function getAllUsers($paging = null, $page = null)
     {
         $select = $this->queryFactory->newSelect();
         $select->cols([
@@ -79,6 +91,11 @@ class QueryBuilder
             'status',
             'users_info.status_id = status.id'
         );
+        if ($paging && $page) {
+            $select->setPaging($paging)->page($page);
+        }
+        $select->orderBy(['id']);
+
         $sth = $this->pdo->prepare($select->getStatement());
         $sth->execute($select->getBindValues());
         return $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -115,7 +132,7 @@ class QueryBuilder
             'users_info.status_id = status.id'
         );
         $select->where('users.id = :id')
-        ->bindValue('id', $id);
+            ->bindValue('id', $id);
         $sth = $this->pdo->prepare($select->getStatement());
         $sth->execute($select->getBindValues());
         return $sth->fetch(PDO::FETCH_ASSOC);

@@ -83,7 +83,7 @@ class AdminController extends UserController
 
     private function changeUserPassword($id, $newPassword)
     {
-        if (!$this->checkToken()){
+        if (!$this->checkToken()) {
             Redirect::to('/');
             exit();
         }
@@ -101,7 +101,7 @@ class AdminController extends UserController
 
     private function changeUserEmail($id)
     {
-        if (!$this->checkToken()){
+        if (!$this->checkToken()) {
             Redirect::to('/');
             exit();
         }
@@ -116,7 +116,7 @@ class AdminController extends UserController
 
     public function editUserSecurity($vars)
     {
-        if (!$this->checkToken()){
+        if (!$this->checkToken()) {
             Redirect::to('/');
             exit();
         }
@@ -158,12 +158,12 @@ class AdminController extends UserController
         $this->redirectIfNotAdmin();
         $token = $this->easyCSRF->generate('csrf');
         echo $this->templates->render('nav_menu', ['auth' => $this->auth]);
-        echo $this->templates->render('add_user', ['token'=>$token]);
+        echo $this->templates->render('add_user', ['token' => $token]);
     }
 
     public function addUser()
     {
-        if (!$this->checkToken()){
+        if (!$this->checkToken()) {
             Redirect::to('/');
             exit();
         }

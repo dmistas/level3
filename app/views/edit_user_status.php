@@ -9,7 +9,7 @@ $this->layout('layout', ['title' => 'Редактирование']) ?>
     </h1>
 
 </div>
-<form action="/edit/status/<?= $user['id']?>" method="post" enctype="multipart/form-data">
+<form action="/edit/status/<?= $user['id'] ?>" method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-xl-6">
             <div id="panel-1" class="panel">
@@ -25,9 +25,15 @@ $this->layout('layout', ['title' => 'Редактирование']) ?>
                                 <div class="form-group">
                                     <label class="form-label" for="example-select">Выберите статус</label>
                                     <select class="form-control" id="example-select" name="status">
-                                        <option <?php if ($user['status']=='online') echo 'selected' ?> value="online">Онлайн</option>
-                                        <option <?php if ($user['status']=='offline') echo 'selected' ?> value="offline">Отошел</option>
-                                        <option <?php if ($user['status']=='dnd') echo 'selected' ?> value="dnd">Не беспокоить</option>
+                                        <option <?php if ($user['status'] == 'online') echo 'selected' ?>
+                                                value="online">Онлайн
+                                        </option>
+                                        <option <?php if ($user['status'] == 'offline') echo 'selected' ?>
+                                                value="offline">Отошел
+                                        </option>
+                                        <option <?php if ($user['status'] == 'dnd') echo 'selected' ?> value="dnd">Не
+                                            беспокоить
+                                        </option>
                                     </select>
                                 </div>
                             </div>
